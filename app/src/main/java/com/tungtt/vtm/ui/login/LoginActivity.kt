@@ -11,7 +11,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import com.tungtt.vtm.MainActivity
 import com.tungtt.vtm.databinding.LoginActivityBinding
+import com.tungtt.vtm.model.UserModel
 
 
 class LoginActivity : AppCompatActivity() {
@@ -36,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
     private fun init() {
         initGoogleSignIn()
         implementListeners()
-        viewModel.init(this);
+        viewModel.init(this)
 
     }
 
@@ -58,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode){
+        when (requestCode) {
             RC_SIGN_IN -> {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 handleSignInResult(task)
@@ -69,12 +71,17 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
             val account = completedTask.getResult(ApiException::class.java)
-            Log.d(TAG, "displayName: "+ account?.displayName)
-            Log.d(TAG, "givenName: "+ account?.givenName)
-            Log.d(TAG, "familyName: "+ account?.familyName)
-            Log.d(TAG, "email: "+ account?.email)
-            Log.d(TAG, "id: "+ account?.id)
-            Log.d(TAG, "photoUrl: "+ account?.photoUrl)
+            val userModel = UserModel(
+                account?.id,
+                account?.displayName,
+                account?.email,
+                account?.photoUrl.toString()
+            )
+            val intent = Intent(this, MainActivity::class.java)
+            val bundle = Bundle()
+            bundle.putParcelable(MainActivity.BUNDLE_USER_MODEL, userModel)
+            intent.putExtras(bundle)
+            startActivity(intent)
         } catch (e: ApiException) {
             Log.w(TAG, "signInResult:failed code=" + e.statusCode)
         }
